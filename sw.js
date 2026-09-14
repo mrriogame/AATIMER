@@ -1,5 +1,5 @@
 /* Cache shell + schedule for offline open. Alarms still need an open page to fire. */
-const CACHE = "timer-site-v1";
+const CACHE = "timer-site-v2";
 const ASSETS = [
   "./",
   "./index.html",

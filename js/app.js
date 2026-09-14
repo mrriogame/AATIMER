@@ -73,27 +73,85 @@ function bindUi() {
   });
 }
 
-function registerPwa() {
-  if (!("serviceWorker" in navigator)) return;
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch((err) => {
-      console.warn("SW register failed:", err);
-    });
-  });
+function isStandaloneApp() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  );
+}
 
-  let deferredPrompt = null;
+function isIosDevice() {
+  const ua = navigator.userAgent || "";
+  const iOS = /iPad|iPhone|iPod/.test(ua);
+  const iPadOs = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  return iOS || iPadOs;
+}
+
+function openIosInstallHelp() {
+  document.getElementById("iosInstallModal").hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function closeIosInstallHelp() {
+  document.getElementById("iosInstallModal").hidden = true;
+  document.body.style.overflow = "";
+}
+
+function registerPwa() {
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch((err) => {
+        console.warn("SW register failed:", err);
+      });
+    });
+  }
+
   const installBtn = document.getElementById("installBtn");
+  const iosModal = document.getElementById("iosInstallModal");
+  let deferredPrompt = null;
+  let installMode = null; // "android" | "ios"
+
+  if (isStandaloneApp()) {
+    installBtn.hidden = true;
+    return;
+  }
+
+  // iOS/Safari: нет beforeinstallprompt — показываем кнопку с инструкцией
+  if (isIosDevice()) {
+    installMode = "ios";
+    installBtn.hidden = false;
+    installBtn.textContent = "На Домой";
+  }
+
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredPrompt = e;
+    installMode = "android";
+    installBtn.textContent = "Установить";
     installBtn.hidden = false;
   });
+
+  window.addEventListener("appinstalled", () => {
+    deferredPrompt = null;
+    installBtn.hidden = true;
+  });
+
   installBtn.addEventListener("click", async () => {
+    if (installMode === "ios" || (!deferredPrompt && isIosDevice())) {
+      openIosInstallHelp();
+      return;
+    }
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     deferredPrompt = null;
     installBtn.hidden = true;
+  });
+
+  document.getElementById("iosInstallClose").addEventListener("click", closeIosInstallHelp);
+  document.getElementById("iosInstallOk").addEventListener("click", closeIosInstallHelp);
+  iosModal.addEventListener("click", (e) => {
+    if (e.target === iosModal) closeIosInstallHelp();
   });
 }
 

@@ -13,6 +13,7 @@ import {
   describeQuestAvailability,
 } from "./quests.js";
 import { registerServiceWorker } from "./sw-register.js";
+import { initAuthUI } from "./auth-ui.js";
 
 const EVENTS_URL = "./data/events.json";
 let catalog = [];
@@ -449,6 +450,8 @@ function registerPwaLite() {
 
 async function main() {
   registerPwaLite();
+  await initAuthUI();
+
   catalog = await loadCatalog();
   setEventsList(catalog);
   window.__aatimerEvents = catalog;

@@ -15,6 +15,7 @@ import {
 import { bindAddEventTaskModal, openAddEventTaskModal } from "./add-task-modal.js";
 import { registerServiceWorker } from "./sw-register.js";
 import { pingSupabase } from "./supabase.js";
+import { initAuthUI } from "./auth-ui.js";
 
 const EVENTS_URL = "./data/events.json";
 
@@ -182,8 +183,9 @@ async function main() {
   bindUi();
   initNotifyControls();
   registerPwa();
+  await initAuthUI();
 
-  // Infrastructure probe only — no sync / auth UI
+  // Infrastructure probe only — no sync
   pingSupabase().then((result) => {
     if (result.ok) {
       console.info("[AATIMER]", result.message);

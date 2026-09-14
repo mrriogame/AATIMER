@@ -18,14 +18,14 @@ export const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_ScJ3G0g76WgZ5jBhrfOg2Q_Tfqjs2F-";
 
 /**
- * Shared browser client. Persist session in localStorage under default sb-*-auth-token
- * when Auth is added later; unused for now.
+ * Shared browser client. Session is persisted by the SDK (not manually).
  */
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    flowType: "pkce",
   },
 });
 

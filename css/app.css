@@ -1340,6 +1340,159 @@ body {
   white-space: nowrap;
 }
 
+.header-auth-wrap {
+  position: relative;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.header-inner .install-btn {
+  margin-left: 8px;
+}
+
+.auth-account-btn {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-account-btn.is-authed {
+  background: rgba(224, 169, 59, 0.35);
+  border-color: rgba(224, 169, 59, 0.8);
+}
+
+.auth-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: min(280px, 82vw);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  z-index: 80;
+}
+
+.auth-menu[hidden] {
+  display: none !important;
+}
+
+.auth-menu-email {
+  font-weight: 800;
+  font-size: 13px;
+  word-break: break-all;
+  margin-bottom: 8px;
+}
+
+.auth-menu-note {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+  margin: 0 0 10px;
+}
+
+.auth-menu-logout {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background: #f3f0ea;
+  color: var(--ink);
+}
+
+.auth-modal {
+  max-width: 420px;
+}
+
+.auth-guest-hint {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.45;
+  margin: 0 0 14px;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.auth-tab {
+  border: 1px solid #ddd;
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-tab.is-active {
+  background: linear-gradient(135deg, #5d3716, #3a2411);
+  color: #fff;
+  border-color: transparent;
+}
+
+.auth-form .task-field-label {
+  margin-top: 4px;
+}
+
+.auth-input {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font: inherit;
+  background: #fff;
+}
+
+.auth-form-error {
+  color: #c0392b;
+  font-size: 13px;
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+.auth-form-success {
+  color: #1e7e34;
+  font-size: 13px;
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+.auth-form-error[hidden],
+.auth-form-success[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .auth-account-btn {
+    max-width: 120px;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .header-inner {
+    gap: 8px;
+  }
+}
+
 .tasks-toolbar {
   display: flex;
   flex-wrap: wrap;

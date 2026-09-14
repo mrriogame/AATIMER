@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#5d3716">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Таймер игровых событий ArcheAge — Пивной Синдикат">
+  <title>Таймер событий — Пивной Синдикат</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/app.css">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="./" class="logo-block">
+          <div class="logo-title">Пивной Синдикат</div>
+          <div class="logo-subtitle">Таймер событий ArcheAge</div>
+        </a>
+        <button type="button" class="install-btn" id="installBtn" hidden>Установить</button>
+      </div>
+    </header>
+
+    <main class="container main-content">
+      <section class="events-page">
+        <div class="events-header">
+          <h1 class="events-title">Таймер событий</h1>
+          <p class="events-subtitle">Расписание игровых событий ArcheAge (МСК)</p>
+        </div>
+
+        <div class="events-time-panel">
+          <div class="events-time-card">
+            <div class="events-time-icon">🕐</div>
+            <div class="events-time-info">
+              <div class="events-time-label">Время МСК</div>
+              <div class="events-time-value" id="realTime">--:--:--</div>
+              <div class="events-time-day" id="currentDay">--</div>
+            </div>
+          </div>
+          <div class="events-time-card">
+            <div class="events-time-icon">🎮</div>
+            <div class="events-time-info">
+              <div class="events-time-label">Игровое время</div>
+              <div class="events-time-value" id="gameTime">--:--:--</div>
+              <div class="events-time-day" id="gamePhase">--</div>
+            </div>
+          </div>
+          <div class="events-time-card events-time-card--notify">
+            <button type="button" class="events-notify-btn" id="notifyBtn">🔕 Выкл</button>
+            <select id="notifyMinutes" class="events-notify-select" aria-label="За сколько минут напоминать">
+              <option value="5">За 5 мин</option>
+              <option value="10">За 10 мин</option>
+              <option value="15">За 15 мин</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="events-hint" id="alarmHint">
+          Будильники сохраняются в браузере. После закрытия вкладки подписки останутся — уведомления сработают, когда сайт снова открыт.
+        </p>
+
+        <div class="events-current" id="currentEvents" hidden>
+          <div class="events-current-header">
+            <span class="events-current-pulse"></span>
+            <span>Сейчас идут события:</span>
+          </div>
+          <div class="events-current-list" id="currentEventsList"></div>
+        </div>
+
+        <div class="events-actions">
+          <button type="button" class="events-action-btn events-action-btn--planner" id="openPlannerBtn">
+            Планировщик маршрута
+          </button>
+          <button type="button" class="events-action-btn events-action-btn--timeline" id="toggleTimelineBtn">
+            Все события по порядку
+          </button>
+        </div>
+
+        <div class="events-timeline-drawer" id="timelineDrawer" hidden>
+          <div class="events-timeline-header">
+            <span>Все события по порядку (сегодня и завтра)</span>
+            <button type="button" class="events-timeline-close" id="closeTimelineBtn" aria-label="Закрыть">✕</button>
+          </div>
+          <div class="events-timeline-content" id="timelineContent"></div>
+        </div>
+
+        <div id="eventsRoot">
+          <div class="events-loading">Загрузка расписания…</div>
+        </div>
+
+        <div class="events-legend">
+          <div class="events-legend-item"><span class="events-legend-dot events-legend-dot--active"></span> Идёт</div>
+          <div class="events-legend-item"><span class="events-legend-dot events-legend-dot--soon"></span> Скоро</div>
+          <div class="events-legend-item"><span class="events-legend-dot events-legend-dot--waiting"></span> Ожидание</div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">Пивной Синдикат · время событий по МСК</div>
+    </footer>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Мобильная навигация">
+    <a href="./" class="bottom-nav-item active">
+      <span class="bottom-nav-icon">⏱️</span>
+      <span class="bottom-nav-label">Таймер</span>
+    </a>
+    <button type="button" class="bottom-nav-item" id="bottomNotifyBtn">
+      <span class="bottom-nav-icon">🔔</span>
+      <span class="bottom-nav-label">Будильники</span>
+    </button>
+    <button type="button" class="bottom-nav-item" id="bottomPlannerBtn">
+      <span class="bottom-nav-icon">📋</span>
+      <span class="bottom-nav-label">Маршрут</span>
+    </button>
+  </nav>
+
+  <div class="events-modal-overlay" id="plannerModal" hidden>
+    <div class="events-modal" role="dialog" aria-modal="true" aria-labelledby="plannerTitle">
+      <div class="events-modal-header">
+        <span id="plannerTitle">Планировщик маршрута</span>
+        <button type="button" class="events-modal-close" id="closePlannerBtn" aria-label="Закрыть">✕</button>
+      </div>
+      <div class="events-modal-body">
+        <p class="events-planner-hint">Выберите события — система составит маршрут на сегодня и завтра</p>
+        <div class="events-planner-checkboxes" id="plannerCheckboxes"></div>
+        <button type="button" class="events-planner-btn" id="buildRouteBtn">Построить маршрут</button>
+        <div class="events-planner-route" id="plannerRoute" hidden>
+          <h4>Ваш маршрут:</h4>
+          <div class="events-route-list" id="routeList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

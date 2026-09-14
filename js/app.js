@@ -13,6 +13,7 @@ import {
   parseScheduleAttr,
 } from "./timers.js";
 import { bindAddEventTaskModal, openAddEventTaskModal } from "./add-task-modal.js";
+import { registerServiceWorker } from "./sw-register.js";
 
 const EVENTS_URL = "./data/events.json";
 
@@ -125,13 +126,7 @@ function closeIosInstallHelp() {
 }
 
 function registerPwa() {
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch((err) => {
-        console.warn("SW register failed:", err);
-      });
-    });
-  }
+  registerServiceWorker();
 
   const installBtn = document.getElementById("installBtn");
   const iosModal = document.getElementById("iosInstallModal");

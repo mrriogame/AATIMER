@@ -12,6 +12,7 @@ import {
   QUEST_KIND,
   describeQuestAvailability,
 } from "./quests.js";
+import { registerServiceWorker } from "./sw-register.js";
 
 const EVENTS_URL = "./data/events.json";
 let catalog = [];
@@ -443,11 +444,7 @@ function bindPickQuestModal() {
 }
 
 function registerPwaLite() {
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
-    });
-  }
+  registerServiceWorker();
 }
 
 async function main() {

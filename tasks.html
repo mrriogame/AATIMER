@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#5d3716">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Трекер задач — Пивной Синдикат">
+  <title>Трекер задач — Пивной Синдикат</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/app.css">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="./" class="logo-block">
+          <div class="logo-title">Пивной Синдикат</div>
+          <div class="logo-subtitle">Трекер задач</div>
+        </a>
+        <a href="./" class="header-link">К таймерам</a>
+      </div>
+    </header>
+
+    <main class="container main-content">
+      <section class="tasks-page">
+        <div class="events-header">
+          <h1 class="events-title">Трекер задач</h1>
+          <p class="events-subtitle">События, дейлики и виклики · хранятся в этом браузере</p>
+        </div>
+
+        <div class="tasks-toolbar">
+          <button type="button" class="events-action-btn events-action-btn--planner" id="createListBtn">
+            Новый список
+          </button>
+          <button type="button" class="events-action-btn events-action-btn--timeline" id="addEventFromTrackerBtn">
+            Добавить событие
+          </button>
+          <button type="button" class="events-action-btn events-action-btn--daily" id="addDailyBtn">
+            Добавить дейлики
+          </button>
+          <button type="button" class="events-action-btn events-action-btn--weekly" id="addWeeklyBtn">
+            Добавить виклики
+          </button>
+        </div>
+
+        <div class="tasks-clocks events-time-panel">
+          <div class="events-time-card">
+            <div class="events-time-icon">🕐</div>
+            <div class="events-time-info">
+              <div class="events-time-label">Время МСК</div>
+              <div class="events-time-value" id="realTime">--:--:--</div>
+              <div class="events-time-day" id="currentDay">--</div>
+            </div>
+          </div>
+          <div class="events-time-card">
+            <div class="events-time-icon">🎮</div>
+            <div class="events-time-info">
+              <div class="events-time-label">Игровое время</div>
+              <div class="events-time-value" id="gameTime">--:--:--</div>
+              <div class="events-time-day" id="gamePhase">--</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tasksRoot"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">Пивной Синдикат · задачи локально</div>
+    </footer>
+  </div>
+
+  <div class="tasks-toast" id="tasksToast" hidden></div>
+
+  <nav class="bottom-nav" aria-label="Мобильная навигация">
+    <a href="./" class="bottom-nav-item">
+      <span class="bottom-nav-icon">⏱️</span>
+      <span class="bottom-nav-label">Таймер</span>
+    </a>
+    <a href="./tasks.html" class="bottom-nav-item active">
+      <span class="bottom-nav-icon">✅</span>
+      <span class="bottom-nav-label">Задачи</span>
+    </a>
+    <button type="button" class="bottom-nav-item" id="createListBtnNav">
+      <span class="bottom-nav-icon">➕</span>
+      <span class="bottom-nav-label">Список</span>
+    </button>
+  </nav>
+
+  <!-- Choice: event / daily / weekly (from list +) -->
+  <div class="events-modal-overlay" id="addChoiceModal" hidden>
+    <div class="events-modal events-modal--sheet" role="dialog" aria-modal="true">
+      <div class="events-modal-header">
+        <span>Добавить в список</span>
+        <button type="button" class="events-modal-close" id="addChoiceCloseBtn" aria-label="Закрыть">✕</button>
+      </div>
+      <div class="events-modal-body add-choice-body">
+        <button type="button" class="add-choice-btn" data-choice="event">
+          <span class="add-choice-icon">⏱️</span>
+          <span class="add-choice-text">
+            <strong>Событие</strong>
+            <small>Из таймера игровых событий</small>
+          </span>
+        </button>
+        <button type="button" class="add-choice-btn" data-choice="daily">
+          <span class="add-choice-icon">☀️</span>
+          <span class="add-choice-text">
+            <strong>Дейлик</strong>
+            <small>Ежедневный квест · раз в 24 ч</small>
+          </span>
+        </button>
+        <button type="button" class="add-choice-btn" data-choice="weekly">
+          <span class="add-choice-icon">📅</span>
+          <span class="add-choice-text">
+            <strong>Виклик</strong>
+            <small>Еженедельный · сброс вс 00:00 МСК</small>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="events-modal-overlay" id="addTaskModal" hidden>
+    <div class="events-modal" role="dialog" aria-modal="true">
+      <div class="events-modal-header">
+        <span>В задачи: <span id="addTaskEventName"></span></span>
+        <button type="button" class="events-modal-close" id="addTaskCloseBtn" aria-label="Закрыть">✕</button>
+      </div>
+      <div class="events-modal-body">
+        <div id="addTaskListField">
+          <label class="task-field-label" for="addTaskListSelect">Список</label>
+          <select id="addTaskListSelect" class="task-field-select"></select>
+        </div>
+        <label class="task-field-label" for="addTaskTimeSelect">Время события (МСК)</label>
+        <select id="addTaskTimeSelect" class="task-field-select"></select>
+        <div class="task-modal-actions">
+          <button type="button" class="task-btn-secondary" id="addTaskCancelBtn">Отмена</button>
+          <button type="button" class="events-planner-btn" id="addTaskConfirmBtn">Добавить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="events-modal-overlay" id="pickEventModal" hidden>
+    <div class="events-modal" role="dialog" aria-modal="true">
+      <div class="events-modal-header">
+        <span>Выберите событие</span>
+        <button type="button" class="events-modal-close" id="pickEventCloseBtn" aria-label="Закрыть">✕</button>
+      </div>
+      <div class="events-modal-body">
+        <div class="pick-event-list" id="pickEventList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="events-modal-overlay" id="pickQuestModal" hidden>
+    <div class="events-modal" role="dialog" aria-modal="true">
+      <div class="events-modal-header">
+        <span id="pickQuestTitle">Квесты</span>
+        <button type="button" class="events-modal-close" id="pickQuestCloseBtn" aria-label="Закрыть">✕</button>
+      </div>
+      <div class="events-modal-body">
+        <p class="quest-stub-note" id="pickQuestStub"></p>
+        <div class="pick-event-list" id="pickQuestList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/tasks-page.js"></script>
+</body>
+</html>

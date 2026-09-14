@@ -182,6 +182,129 @@ function findBestSlot(schedule) {
   return bestSlot;
 }
 
+/** Absolute Date for a schedule start in Europe/Moscow (dayOffset from today MSK). */
+export function getMskOccurrenceDate(dayOffset, startHHMM) {
+  const [sh, sm] = startHHMM.split(":").map(Number);
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Moscow",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const get = (type) => parts.find((p) => p.type === type).value;
+  const y = Number(get("year"));
+  const mo = Number(get("month"));
+  const d = Number(get("day"));
+  // Construct as UTC instant that equals MSK wall time: MSK = UTC+3 (no DST)
+  const utcMs = Date.UTC(y, mo - 1, d + dayOffset, sh - 3, sm, 0);
+  return new Date(utcMs);
+}
+
+/**
+ * Upcoming occurrences for an event schedule (reuses timer day/slot rules).
+ * Returns up to `limit` items with ISO eventTime and labels.
+ */
+export function getUpcomingOccurrences(schedule, limit = 6) {
+  const msk = getMskTimeParts();
+  const currentDayIso = getMskDayOfWeek();
+  const currentMinutes = msk.h * 60 + msk.m;
+  const items = [];
+
+  for (let dayOffset = 0; dayOffset < 14 && items.length < limit; dayOffset++) {
+    let checkDayIso = currentDayIso + dayOffset;
+    while (checkDayIso > 7) checkDayIso -= 7;
+
+    const daySlots = [];
+    for (const slot of schedule || []) {
+      const allowedDays = slot.days || [1, 2, 3, 4, 5, 6, 7];
+      if (!allowedDays.includes(checkDayIso)) continue;
+      const [sh, sm] = slot.start.split(":").map(Number);
+      const startMin = sh * 60 + sm;
+      if (dayOffset === 0 && startMin < currentMinutes) continue;
+      daySlots.push(slot);
+    }
+    daySlots.sort((a, b) => {
+      const [ah, am] = a.start.split(":").map(Number);
+      const [bh, bm] = b.start.split(":").map(Number);
+      return ah * 60 + am - (bh * 60 + bm);
+    });
+
+    for (const slot of daySlots) {
+      if (items.length >= limit) break;
+      const when = getMskOccurrenceDate(dayOffset, slot.start);
+      let dayLabel = "Сегодня";
+      if (dayOffset === 1) dayLabel = "Завтра";
+      else if (dayOffset > 1) {
+        let futureDay = getJsDayOfWeek() + dayOffset;
+        while (futureDay > 6) futureDay -= 7;
+        dayLabel = WEEKDAY_SHORT[futureDay];
+      }
+      items.push({
+        start: slot.start,
+        end: slot.end,
+        dayOffset,
+        dayLabel,
+        eventTime: when.toISOString(),
+        label: `${dayLabel} ${slot.start}`,
+        remainingMs: when.getTime() - Date.now(),
+      });
+    }
+  }
+  return items;
+}
+
+export function describeEventTime(iso) {
+  if (!iso) return { whenLabel: "", remainingLabel: "", remainingMs: null, past: false };
+  const when = new Date(iso);
+  if (Number.isNaN(when.getTime())) {
+    return { whenLabel: "", remainingLabel: "", remainingMs: null, past: false };
+  }
+  const remainingMs = when.getTime() - Date.now();
+  const past = remainingMs <= 0;
+
+  const mskParts = new Intl.DateTimeFormat("ru-RU", {
+    timeZone: "Europe/Moscow",
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(when);
+  const g = (t) => mskParts.find((p) => p.type === t)?.value || "";
+  const timeStr = `${g("hour")}:${g("minute")}`;
+
+  const todayParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Moscow",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  const eventDay = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Moscow",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(when);
+
+  let whenLabel;
+  const [ty, tm, td] = todayParts.split("-").map(Number);
+  const todayUtc = Date.UTC(ty, tm - 1, td);
+  const [ey, em, ed] = eventDay.split("-").map(Number);
+  const eventUtc = Date.UTC(ey, em - 1, ed);
+  const dayDiff = Math.round((eventUtc - todayUtc) / 86400000);
+  if (dayDiff === 0) whenLabel = `Сегодня в ${timeStr}`;
+  else if (dayDiff === 1) whenLabel = `Завтра в ${timeStr}`;
+  else whenLabel = `${g("weekday")} ${g("day")}.${g("month")} в ${timeStr}`;
+
+  const remainingLabel = past ? "Уже началось / прошло" : `Через ${formatDur(remainingMs)}`;
+  return { whenLabel, remainingLabel, remainingMs, past };
+}
+
+export function getBestSlotForSchedule(schedule) {
+  return findBestSlot(schedule);
+}
+
 function checkNotification(id, name, mins) {
   if (!notificationsEnabled || !subscribedEvents[String(id)]) return;
   if (mins > notifyMinutes || mins <= 0) return;
@@ -264,11 +387,11 @@ function escHtml(str) {
   return d.innerHTML;
 }
 
-function encodeScheduleAttr(schedule) {
+export function encodeScheduleAttr(schedule) {
   return encodeURIComponent(JSON.stringify(schedule || []));
 }
 
-function parseScheduleAttr(raw) {
+export function parseScheduleAttr(raw) {
   if (!raw) return [];
   try {
     return JSON.parse(decodeURIComponent(raw));
@@ -338,6 +461,7 @@ export function renderEvents(events) {
                         <div class="event-name-wrap">
                           <span class="event-title">${escHtml(event.name)}</span>
                           ${hasInfo ? `<button type="button" class="event-info-btn" data-info-btn title="Подробнее">ℹ️</button>` : ""}
+                          <button type="button" class="event-task-btn" data-add-task title="Добавить в задачи">➕</button>
                         </div>
                       </div>
                     </td>
@@ -628,4 +752,8 @@ export function initNotifyControls() {
 
 export function getEventsList() {
   return eventsList;
+}
+
+export function setEventsList(events) {
+  eventsList = Array.isArray(events) ? events : [];
 }

@@ -10,7 +10,9 @@ import {
   buildTimeline,
   initNotifyControls,
   updateNotifyButton,
+  parseScheduleAttr,
 } from "./timers.js";
+import { bindAddEventTaskModal, openAddEventTaskModal } from "./add-task-modal.js";
 
 const EVENTS_URL = "./data/events.json";
 
@@ -19,6 +21,17 @@ async function loadEvents() {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
   return data.events || [];
+}
+
+function toast(msg) {
+  const el = document.getElementById("tasksToast");
+  if (!el) return;
+  el.textContent = msg;
+  el.hidden = false;
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => {
+    el.hidden = true;
+  }, 2200);
 }
 
 function openPlanner() {
@@ -43,9 +56,8 @@ function toggleTimeline() {
 
 function bindUi() {
   document.getElementById("notifyBtn").addEventListener("click", toggleNotifications);
-  document.getElementById("bottomNotifyBtn").addEventListener("click", toggleNotifications);
+  document.getElementById("bottomNotifyBtn")?.addEventListener("click", toggleNotifications);
   document.getElementById("openPlannerBtn").addEventListener("click", openPlanner);
-  document.getElementById("bottomPlannerBtn").addEventListener("click", openPlanner);
   document.getElementById("closePlannerBtn").addEventListener("click", closePlanner);
   document.getElementById("buildRouteBtn").addEventListener("click", buildRoute);
   document.getElementById("toggleTimelineBtn").addEventListener("click", toggleTimeline);
@@ -69,7 +81,22 @@ function bindUi() {
     const infoBtn = e.target.closest("[data-info-btn]");
     if (infoBtn) {
       showEventInfo(infoBtn.closest(".event-row"));
+      return;
     }
+    const addTaskBtn = e.target.closest("[data-add-task]");
+    if (addTaskBtn) {
+      const row = addTaskBtn.closest(".event-row");
+      if (!row) return;
+      openAddEventTaskModal({
+        id: row.dataset.eventId,
+        name: row.dataset.eventName,
+        schedule: parseScheduleAttr(row.dataset.schedule),
+      });
+    }
+  });
+
+  bindAddEventTaskModal(() => {
+    toast("Добавлено в трекер задач");
   });
 }
 

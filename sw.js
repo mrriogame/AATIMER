@@ -1,13 +1,19 @@
 /* Cache shell + schedule for offline open. Alarms still need an open page to fire. */
-const CACHE = "timer-site-v2";
+const CACHE = "timer-site-v4";
 const ASSETS = [
   "./",
   "./index.html",
+  "./tasks.html",
   "./css/app.css",
   "./js/app.js",
   "./js/storage.js",
   "./js/timers.js",
+  "./js/tasks-page.js",
+  "./js/add-task-modal.js",
+  "./js/quests.js",
   "./data/events.json",
+  "./data/dailies.json",
+  "./data/weeklies.json",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

@@ -1,7 +1,7 @@
 {
-  "name": "Пивной Синдикат — Таймер",
-  "short_name": "Таймер AA",
-  "description": "Таймер игровых событий ArcheAge",
+  "name": "Пивной Синдикат — Таймер и задачи",
+  "short_name": "AA Timer",
+  "description": "Таймер событий ArcheAge и трекер задач",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

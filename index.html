@@ -108,6 +108,9 @@
           <button type="button" class="events-action-btn events-action-btn--timeline" id="toggleTimelineBtn">
             Все события по порядку
           </button>
+          <a href="./tasks.html" class="events-action-btn events-action-btn--tasks">
+            Трекер задач
+          </a>
         </div>
 
         <div class="events-timeline-drawer" id="timelineDrawer" hidden>
@@ -140,13 +143,13 @@
       <span class="bottom-nav-icon">⏱️</span>
       <span class="bottom-nav-label">Таймер</span>
     </a>
+    <a href="./tasks.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">✅</span>
+      <span class="bottom-nav-label">Задачи</span>
+    </a>
     <button type="button" class="bottom-nav-item" id="bottomNotifyBtn">
       <span class="bottom-nav-icon">🔔</span>
       <span class="bottom-nav-label">Будильники</span>
-    </button>
-    <button type="button" class="bottom-nav-item" id="bottomPlannerBtn">
-      <span class="bottom-nav-icon">📋</span>
-      <span class="bottom-nav-label">Маршрут</span>
     </button>
   </nav>
 
@@ -167,6 +170,27 @@
       </div>
     </div>
   </div>
+
+  <div class="events-modal-overlay" id="addTaskModal" hidden>
+    <div class="events-modal" role="dialog" aria-modal="true">
+      <div class="events-modal-header">
+        <span>В задачи: <span id="addTaskEventName"></span></span>
+        <button type="button" class="events-modal-close" id="addTaskCloseBtn" aria-label="Закрыть">✕</button>
+      </div>
+      <div class="events-modal-body">
+        <label class="task-field-label" for="addTaskListSelect">Список</label>
+        <select id="addTaskListSelect" class="task-field-select"></select>
+        <label class="task-field-label" for="addTaskTimeSelect">Время события (МСК)</label>
+        <select id="addTaskTimeSelect" class="task-field-select"></select>
+        <div class="task-modal-actions">
+          <button type="button" class="task-btn-secondary" id="addTaskCancelBtn">Отмена</button>
+          <button type="button" class="events-planner-btn" id="addTaskConfirmBtn">Добавить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tasks-toast" id="tasksToast" hidden></div>
 
   <script type="module" src="./js/app.js"></script>
 </body>

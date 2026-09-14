@@ -14,6 +14,7 @@ import {
 } from "./timers.js";
 import { bindAddEventTaskModal, openAddEventTaskModal } from "./add-task-modal.js";
 import { registerServiceWorker } from "./sw-register.js";
+import { pingSupabase } from "./supabase.js";
 
 const EVENTS_URL = "./data/events.json";
 
@@ -181,6 +182,15 @@ async function main() {
   bindUi();
   initNotifyControls();
   registerPwa();
+
+  // Infrastructure probe only — no sync / auth UI
+  pingSupabase().then((result) => {
+    if (result.ok) {
+      console.info("[AATIMER]", result.message);
+    } else {
+      console.warn("[AATIMER]", result.message, result.error || "");
+    }
+  });
 
   updateClocks();
   setInterval(updateClocks, 250);

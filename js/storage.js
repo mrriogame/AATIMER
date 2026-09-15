@@ -1,9 +1,23 @@
 /**
  * Local settings + task tracker store.
- * Timer keys stay compatible with the old PHP site.
- * Task keys are namespaced for future Supabase sync (UUID ids, timestamps).
+ *
+ * Guest (no auth): legacy LocalStorage keys (PHP-compatible timer prefs).
+ * Authenticated: keys scoped by auth user id so accounts never share data
+ * in the same browser. Sync is NOT implemented here — only key isolation.
+ *
+ * Guest keys:
+ *   eventsNotify, eventsNotifyMinutes, eventsSubscribed, eventsCollapsed
+ *   aatimer_task_lists, aatimer_tasks
+ *
+ * Auth keys (same value shapes):
+ *   aatimer:u:{userId}:eventsNotify
+ *   aatimer:u:{userId}:eventsNotifyMinutes
+ *   aatimer:u:{userId}:eventsSubscribed
+ *   aatimer:u:{userId}:eventsCollapsed
+ *   aatimer:u:{userId}:task_lists
+ *   aatimer:u:{userId}:tasks
  */
-const KEYS = {
+const GUEST_KEYS = {
   notify: "eventsNotify",
   notifyMinutes: "eventsNotifyMinutes",
   subscribed: "eventsSubscribed",
@@ -11,6 +25,25 @@ const KEYS = {
   taskLists: "aatimer_task_lists",
   tasks: "aatimer_tasks",
 };
+
+/** @type {string|null} */
+let activeUserId = null;
+
+/** @type {Set<(userId: string|null) => void>} */
+const scopeListeners = new Set();
+
+function storageKey(logical) {
+  if (!activeUserId) return GUEST_KEYS[logical];
+  const suffix = {
+    notify: "eventsNotify",
+    notifyMinutes: "eventsNotifyMinutes",
+    subscribed: "eventsSubscribed",
+    collapsed: "eventsCollapsed",
+    taskLists: "task_lists",
+    tasks: "tasks",
+  }[logical];
+  return `aatimer:u:${activeUserId}:${suffix}`;
+}
 
 function readJson(key, fallback) {
   try {
@@ -37,6 +70,42 @@ export function createId() {
   return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+/**
+ * Bind LocalStorage reads/writes to an auth user, or null for guest.
+ * Does not copy/migrate data between scopes (merge is a future sync step).
+ */
+export function setActiveUserId(userId) {
+  const next = userId ? String(userId) : null;
+  if (next === activeUserId) return;
+  activeUserId = next;
+  scopeListeners.forEach((fn) => {
+    try {
+      fn(activeUserId);
+    } catch (e) {
+      console.warn("[AATIMER] storage scope listener error", e);
+    }
+  });
+}
+
+export function getActiveUserId() {
+  return activeUserId;
+}
+
+export function isGuestStorage() {
+  return activeUserId == null;
+}
+
+/** Subscribe to guest ↔ account (or account A ↔ B) scope switches. */
+export function onStorageScopeChange(fn) {
+  scopeListeners.add(fn);
+  return () => scopeListeners.delete(fn);
+}
+
+/**
+ * Local default list for the current scope (guest or per-user bucket).
+ * Cloud canonical default is created by signup trigger (is_default=true).
+ * Local `isDefault` marks auto-created lists for a future merge remap.
+ */
 function ensureDefaultList(lists) {
   const active = lists.filter((l) => !l.deletedAt);
   if (active.length) return lists;
@@ -46,36 +115,42 @@ function ensureDefaultList(lists) {
     id,
     title: "Мои задачи",
     sortOrder: 0,
+    isDefault: true,
     createdAt: t,
     updatedAt: t,
     deletedAt: null,
   });
-  writeJson(KEYS.taskLists, lists);
+  writeJson(storageKey("taskLists"), lists);
   return lists;
 }
 
 export const storage = {
+  setActiveUserId,
+  getActiveUserId,
+  isGuestStorage,
+  onStorageScopeChange,
+
   getNotificationsEnabled() {
-    return localStorage.getItem(KEYS.notify) === "true";
+    return localStorage.getItem(storageKey("notify")) === "true";
   },
   setNotificationsEnabled(on) {
-    localStorage.setItem(KEYS.notify, on ? "true" : "false");
+    localStorage.setItem(storageKey("notify"), on ? "true" : "false");
   },
 
   getNotifyMinutes() {
-    const n = parseInt(localStorage.getItem(KEYS.notifyMinutes) || "5", 10);
+    const n = parseInt(localStorage.getItem(storageKey("notifyMinutes")) || "5", 10);
     return Number.isFinite(n) ? n : 5;
   },
   setNotifyMinutes(minutes) {
-    localStorage.setItem(KEYS.notifyMinutes, String(minutes));
+    localStorage.setItem(storageKey("notifyMinutes"), String(minutes));
   },
 
   getSubscribed() {
-    const data = readJson(KEYS.subscribed, {});
+    const data = readJson(storageKey("subscribed"), {});
     return data && typeof data === "object" ? data : {};
   },
   setSubscribed(map) {
-    writeJson(KEYS.subscribed, map);
+    writeJson(storageKey("subscribed"), map);
   },
   toggleSubscription(eventId) {
     const map = this.getSubscribed();
@@ -90,17 +165,17 @@ export const storage = {
   },
 
   getCollapsed() {
-    const data = readJson(KEYS.collapsed, {});
+    const data = readJson(storageKey("collapsed"), {});
     return data && typeof data === "object" ? data : {};
   },
   setCollapsed(map) {
-    writeJson(KEYS.collapsed, map);
+    writeJson(storageKey("collapsed"), map);
   },
 
   /* ===== Task lists ===== */
 
   getAllTaskLists() {
-    const lists = readJson(KEYS.taskLists, []);
+    const lists = readJson(storageKey("taskLists"), []);
     return Array.isArray(lists) ? ensureDefaultList(lists) : ensureDefaultList([]);
   },
 
@@ -111,7 +186,7 @@ export const storage = {
   },
 
   saveTaskLists(lists) {
-    writeJson(KEYS.taskLists, lists);
+    writeJson(storageKey("taskLists"), lists);
   },
 
   createTaskList(title) {
@@ -122,6 +197,7 @@ export const storage = {
       id: createId(),
       title: (title || "Новый список").trim() || "Новый список",
       sortOrder: active.length ? Math.max(...active.map((l) => l.sortOrder)) + 1 : 0,
+      isDefault: false,
       createdAt: t,
       updatedAt: t,
       deletedAt: null,
@@ -170,7 +246,7 @@ export const storage = {
   /* ===== Tasks ===== */
 
   getAllTasks() {
-    const tasks = readJson(KEYS.tasks, []);
+    const tasks = readJson(storageKey("tasks"), []);
     return Array.isArray(tasks) ? tasks : [];
   },
 
@@ -191,7 +267,7 @@ export const storage = {
   },
 
   saveTasks(tasks) {
-    writeJson(KEYS.tasks, tasks);
+    writeJson(storageKey("tasks"), tasks);
   },
 
   createTask({

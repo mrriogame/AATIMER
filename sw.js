@@ -10,7 +10,7 @@
  *
  * Bump CACHE_NAME on every release that changes app files.
  */
-const CACHE_NAME = "aatimer-cache-v7";
+const CACHE_NAME = "aatimer-cache-v31";
 
 const PRECACHE = [
   "./",
@@ -27,6 +27,8 @@ const PRECACHE = [
   "./js/supabase.js",
   "./js/auth.js",
   "./js/auth-ui.js",
+  "./js/crypto-support.js",
+  "./js/vendor/qrcode-generator.js",
   "./data/events.json",
   "./data/dailies.json",
   "./data/weeklies.json",

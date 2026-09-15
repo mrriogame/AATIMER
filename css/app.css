@@ -777,6 +777,275 @@ body {
   background: #6c757d;
 }
 
+/* ===== Support / YooMoney donate ===== */
+.support-block {
+  margin-top: 18px;
+  padding: 14px 14px 12px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.support-title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.support-text {
+  margin: 0 auto 10px;
+  max-width: 36em;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.support-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  max-width: 100%;
+}
+
+.support-ym-wrap {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  /* iframe 330px, видимая кнопка ~290px — обрезаем пустое справа */
+  width: 290px;
+  height: 50px;
+  flex: 0 0 auto;
+  max-width: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+.support-ym-iframe {
+  display: block;
+  width: 330px;
+  height: 50px;
+  max-width: none;
+  border: 0;
+  background: transparent;
+}
+
+/* Same construction/size as YooMoney L (XmOMYkBf): 46px / pad 54 / r12 */
+.support-crypto-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: 46px;
+  flex: 0 0 auto;
+  max-width: 100%;
+  padding: 0 36px;
+  border: 0;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: normal;
+  line-height: 24px;
+  white-space: nowrap;
+  color: #fff;
+  cursor: pointer;
+  background: #0098ea;
+  box-shadow: none;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.crypto-btn-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  flex: 0 0 24px;
+  background: transparent;
+}
+
+.crypto-btn-logo img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  background: transparent;
+}
+
+.crypto-btn-text {
+  flex: 0 0 auto;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.support-crypto-btn:hover {
+  filter: brightness(1.08);
+}
+
+.support-crypto-btn:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 680px) {
+  .support-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .support-ym-wrap {
+    width: min(330px, 100%);
+  }
+
+  .support-crypto-btn {
+    width: min(100%, 340px);
+    height: 46px;
+    padding: 0 24px;
+  }
+}
+
+/* Crypto donate modal */
+.crypto-support-modal {
+  width: min(440px, 100%);
+}
+
+.crypto-support-body {
+  text-align: center;
+}
+
+.crypto-support-lead {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.crypto-currency-tabs {
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  margin-bottom: 14px;
+  background: rgba(93, 55, 22, 0.08);
+  border-radius: 999px;
+}
+
+.crypto-currency-tab {
+  min-width: 88px;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--brand);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.crypto-currency-tab.is-active {
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color: #fff;
+}
+
+.crypto-network-note {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #7a3e0c;
+  background: rgba(224, 169, 59, 0.22);
+  border: 1px solid rgba(224, 169, 59, 0.45);
+  border-radius: 10px;
+}
+
+.crypto-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.crypto-qr {
+  width: 180px;
+  height: 180px;
+  max-width: 100%;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 8px;
+}
+
+.crypto-qr-caption {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.crypto-address-box {
+  margin-bottom: 14px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.crypto-address {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.crypto-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.crypto-action-btn {
+  flex: 1 1 160px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.crypto-wallet-link {
+  margin: 0;
+}
+
+.crypto-wallet-hint {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.crypto-copy-feedback {
+  margin: 12px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e7a3a;
+}
+
 .events-modal-overlay {
   position: fixed;
   inset: 0;
@@ -792,7 +1061,10 @@ body {
 .events-timeline-drawer[hidden],
 .events-current[hidden],
 .events-planner-route[hidden],
-.install-btn[hidden] {
+.install-btn[hidden],
+#cryptoSupportModal[hidden],
+#cryptoNetworkNote[hidden],
+#cryptoCopyFeedback[hidden] {
   display: none !important;
 }
 
@@ -1200,6 +1472,25 @@ body {
     margin-top: 14px;
     flex-wrap: wrap;
     justify-content: center;
+  }
+
+  .support-block {
+    margin-top: 14px;
+    padding: 12px 12px 10px;
+  }
+
+  .support-title {
+    font-size: 18px;
+  }
+
+  .support-text {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .crypto-qr {
+    width: 160px;
+    height: 160px;
   }
 }
 

@@ -1,8 +1,10 @@
 /**
  * Supabase Auth — session only (no data sync).
- * Guest mode keeps using LocalStorage unchanged.
+ * Switches LocalStorage scope to auth user id (or guest) so accounts
+ * do not share app data in the same browser.
  */
 import { supabase } from "./supabase.js";
+import { setActiveUserId } from "./storage.js";
 
 /** @typedef {{ id: string, email: string|null }} AuthUser */
 
@@ -39,6 +41,8 @@ function setUser(user) {
   const same =
     (!currentUser && !next) ||
     (currentUser && next && currentUser.id === next.id && currentUser.email === next.email);
+  // Always align storage scope (idempotent if unchanged)
+  setActiveUserId(next?.id ?? null);
   currentUser = next;
   if (!same) {
     listeners.forEach((fn) => {
@@ -166,7 +170,10 @@ export async function signOut() {
     return { ok: false, message: mapAuthError(error) };
   }
   setUser(null);
-  return { ok: true, message: "Вы вышли. Данные в этом браузере сохранены." };
+  return {
+    ok: true,
+    message: "Вы вышли. Показаны данные гостя; данные аккаунта остались в его локальном пространстве.",
+  };
 }
 
 /**

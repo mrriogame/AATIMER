@@ -11,11 +11,14 @@ import {
   initNotifyControls,
   updateNotifyButton,
   parseScheduleAttr,
+  reloadLocalPrefsFromStorage,
 } from "./timers.js";
 import { bindAddEventTaskModal, openAddEventTaskModal } from "./add-task-modal.js";
 import { registerServiceWorker } from "./sw-register.js";
 import { pingSupabase } from "./supabase.js";
 import { initAuthUI } from "./auth-ui.js";
+import { onStorageScopeChange } from "./storage.js";
+import { bindCryptoSupport } from "./crypto-support.js";
 
 const EVENTS_URL = "./data/events.json";
 
@@ -181,9 +184,15 @@ function registerPwa() {
 
 async function main() {
   bindUi();
-  initNotifyControls();
+  bindCryptoSupport();
   registerPwa();
+  // Auth first so LocalStorage scope is bound before reading prefs / rendering
   await initAuthUI();
+  reloadLocalPrefsFromStorage();
+  initNotifyControls();
+  onStorageScopeChange(() => {
+    reloadLocalPrefsFromStorage();
+  });
 
   // Infrastructure probe only — no sync
   pingSupabase().then((result) => {

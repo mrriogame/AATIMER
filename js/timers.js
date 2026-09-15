@@ -750,6 +750,28 @@ export function initNotifyControls() {
   updateAlarmButtons();
 }
 
+/**
+ * Re-read timer prefs from the active LocalStorage scope (guest or user).
+ * Call after auth/storage scope changes so one account never shows another's alarms.
+ */
+export function reloadLocalPrefsFromStorage() {
+  notificationsEnabled = storage.getNotificationsEnabled();
+  notifyMinutes = storage.getNotifyMinutes();
+  subscribedEvents = storage.getSubscribed();
+  collapsedCategories = storage.getCollapsed();
+  notifiedEvents = new Set();
+
+  const select = document.getElementById("notifyMinutes");
+  if (select) select.value = String(notifyMinutes);
+
+  if (eventsList.length) {
+    renderEvents(eventsList);
+  } else {
+    updateNotifyButton();
+    updateAlarmButtons();
+  }
+}
+
 export function getEventsList() {
   return eventsList;
 }

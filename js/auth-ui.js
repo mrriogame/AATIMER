@@ -20,7 +20,7 @@ function ensureMarkup() {
       <button type="button" class="auth-account-btn" id="authAccountBtn">Войти</button>
       <div class="auth-menu" id="authMenu" hidden>
         <div class="auth-menu-email" id="authMenuEmail"></div>
-        <p class="auth-menu-note">Данные пока только в этом браузере. Синхронизация устройств — позже.</p>
+        <p class="auth-menu-note">Данные аккаунта хранятся отдельно от гостя в этом браузере. Синхронизация между устройствами — позже.</p>
         <button type="button" class="auth-menu-logout" id="authLogoutBtn">Выйти</button>
       </div>`;
     // Insert before install btn or at end
@@ -43,7 +43,7 @@ function ensureMarkup() {
         <div class="events-modal-body">
           <p class="auth-guest-hint">
             Сайт работает без регистрации. Аккаунт понадобится для синхронизации между устройствами (скоро).
-            Сейчас данные гостя и аккаунта хранятся локально в браузере.
+            Данные гостя и данные каждого аккаунта в браузере изолированы.
           </p>
           <div class="auth-tabs">
             <button type="button" class="auth-tab is-active" data-auth-tab="login">Вход</button>

@@ -1,4 +1,4 @@
-import { storage } from "./storage.js";
+import { storage, onStorageScopeChange } from "./storage.js";
 import {
   updateClocks,
   describeEventTime,
@@ -459,6 +459,10 @@ async function main() {
   weekliesCatalog = await loadWeekliesCatalog();
 
   bindPage();
+  onStorageScopeChange(() => {
+    lockedListId = null;
+    render();
+  });
   render();
 
   updateClocks();
